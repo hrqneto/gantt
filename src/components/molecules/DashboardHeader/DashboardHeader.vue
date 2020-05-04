@@ -3,7 +3,7 @@
     <div class="header-texts">
       <generic-title
       class="header-title"
-      >Dashboard</generic-title>
+      >Planejamento de Produção</generic-title>
       <generic-sub-title
         class="header-sub-title"
         color="gray"

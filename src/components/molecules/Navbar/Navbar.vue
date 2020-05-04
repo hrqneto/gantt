@@ -12,11 +12,6 @@
         <img class="img-logo" src="../../../assets/images/dass-logo-dashboard.png" alt="">
       </el-menu-item>
       <el-menu-item index="1">Dashboard</el-menu-item>
-      <el-menu-item index="2">Cadastros</el-menu-item>
-      <el-menu-item index="3">Movimentações</el-menu-item>
-      <el-menu-item index="4">Consultas</el-menu-item>
-      <el-menu-item index="5">Relatórios</el-menu-item>
-      <el-menu-item index="6">Configurações</el-menu-item>
       <div class="loggout-menu">
         <el-menu-item index="7" @click="loggout()">Sair</el-menu-item>
       </div>
