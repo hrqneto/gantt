@@ -9,6 +9,7 @@ export default {
 </script>
 
 <style lang="scss">
+  @import "~@fortawesome/fontawesome-free/css/all.min.css";
   @import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
 
   $gray: #C0C4CC;
@@ -41,7 +42,7 @@ export default {
     margin: 0;
     padding: 0;
     border: 0;
-    background-color: #f5f5f5;
+    background-color: transparent;
     animation: fadein 1s;
     -moz-animation: fadein 1s; /* Firefox */
     -webkit-animation: fadein 1s; /* Safari and Chrome */
@@ -81,4 +82,7 @@ export default {
     }
   }
 
+.gantt-schedule-timeline-calendar__chart-timeline-items-row-item {
+  background: #b0042b !important;
+}
 </style>

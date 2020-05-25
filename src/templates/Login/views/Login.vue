@@ -56,8 +56,7 @@ export default {
       }else {
         this.$notify({
           title: 'Credenciais Inválidas',
-          message: 'Favor verificar suas credencias!',
-          position: 'top-left',
+           position: 'top-left',
           type: 'warning'
         })
       }

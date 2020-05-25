@@ -2,45 +2,10 @@
   <div class="dashboard">
     <navbar></navbar>
     <dashboard-header></dashboard-header>
-    <div :class="`grid-${getGridRows === '4' ? '4-rows' : '2-rows'}`">
-      <div class="left-content">
+    <div :class="grid">
+      <div class="cointainer-gantt">
         <div class="left-text-1" v-if="getCell.includes('sc1')">
           <p class="sc1">SC1</p>
-          <frappe-gantt
-            class="gantt-graph"
-            :view-mode="getPeriodMode"
-            :tasks="getTasks"
-            @task-updated="debugEventLog.push($event)"
-            @task-date-updated="debugEventLog.push($event)"
-            @task-progress-change="debugEventLog.push($event)"
-          ></frappe-gantt>
-        </div>
-        <div class="left-text-3" v-if="getCell.includes('sc3')">
-          <p class="sc3">SC3</p>
-          <frappe-gantt
-            class="gantt-graph"
-            :view-mode="getPeriodMode"
-            :tasks="getTasks"
-            @task-updated="debugEventLog.push($event)"
-            @task-date-updated="debugEventLog.push($event)"
-            @task-progress-change="debugEventLog.push($event)"
-          ></frappe-gantt>
-        </div>
-      </div>
-      <div class="right-content">
-        <div class="right-text-2" v-if="getCell.includes('sc2')">
-          <p class="sc2">SC2</p>
-          <frappe-gantt
-            class="gantt-graph"
-            :view-mode="getPeriodMode"
-            :tasks="getTasks"
-            @task-updated="debugEventLog.push($event)"
-            @task-date-updated="debugEventLog.push($event)"
-            @task-progress-change="debugEventLog.push($event)"
-          ></frappe-gantt>
-        </div>
-        <div class="right-text-4" v-if="getCell.includes('sc4')">
-          <p class="sc4">SC4</p>
           <frappe-gantt
             class="gantt-graph"
             :view-mode="getPeriodMode"
@@ -109,6 +74,21 @@ export default {
     margin-top: 20px;
   }
   .dashboard {
+    .cointainer-gantt {
+      margin: 30px;
+      padding: 30px;
+      -webkit-box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+      -moz-box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+      -ms-box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+      -o-box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+      -webkit-box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+      -moz-box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+      -ms-box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+      -o-box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+      display: block;
+    }
     .grid-4-rows {
       display: flex;
       flex-direction: column;
@@ -136,6 +116,7 @@ export default {
         }
       }
     }
+    
     .grid-2-rows {
       display: flex;
       justify-content: center;
