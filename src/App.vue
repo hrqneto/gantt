@@ -81,8 +81,4 @@ export default {
       opacity: 1;
     }
   }
-
-.gantt-schedule-timeline-calendar__chart-timeline-items-row-item {
-  background: #b0042b !important;
-}
 </style>

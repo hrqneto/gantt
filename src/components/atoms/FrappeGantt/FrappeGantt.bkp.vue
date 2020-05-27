@@ -7,22 +7,11 @@
 <script>
 import plugin from "gantt-schedule-timeline-calendar";
 import ItemMovement from "gantt-schedule-timeline-calendar/dist/ItemMovement.plugin";
-import WeekendHighlight from "gantt-schedule-timeline-calendar/dist/WeekendHighlight.plugin.js";
 import GSTC from "vue-gantt-schedule-timeline-calendar";
 
 import json from "../../../assets/json_response.json";
 
-const subs = [];
-const week_colour = (week) =>
-  week % 5 === 0
-    ? "red"
-  : week % 5 === 1
-    ? "darkgreen"
-  : week % 5 === 2
-    ? "indigo"
-  : week % 5 === 3
-    ? "orange"
-  : "darkmagenta";
+let subs = [];
 
 export default {
   name: "app",
@@ -34,13 +23,21 @@ export default {
       json,
       config: {
         height: 500,
+        grid: {
+          block: {
+            onCreate: []
+          }
+        },
         locale: {
           name: "pt-br",
-          weekdays: ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"],
-          weekdaysShort: ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"],
-          weekdaysMin: ["D", "S", "T", "Q", "Q", "S", "S"],
-          months: ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"],
-          monthsShort: ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"]
+          weekdays: "Domingo_Segunda_Terça_Quarta_Quinta_Sexta_Sábado".split("_"),
+          weekdaysShort: "Dom_Seg_Ter_Qua_Qui_Sex_Sáb".split("_"),
+          weekdaysMin: "D_S_T_Q_Q_S_S".split("_"),
+          months: "Janeiro_Fevereiro_Março_Abril_Maio_Junho_Julho_Agosto_Setembro_Outubro_Novembro_Dezembro".split(
+            "_"
+          ),
+          monthsShort: "Jan_Fev_Mar_Abr_Mai_Jun_Jul_Ago_Set_Out_Nov_Dez".split("_"),
+          weekStart: 0
         },
         chart: {
           items: json.gerentes
@@ -55,53 +52,13 @@ export default {
                     [`${index}-${group.id}-${model.modelo}-${task.lote}`]: {
                       id: `${index}-${group.id}-${model.modelo}-${task.lote}`,
                       rowId: `${index}-${group.id}-${model.modelo}`,
-                      moveable: json.gerentes
-                        .map((moveable_user, moveable_index) =>
-                          moveable_user.celula_grupos
-                            .filter((moveable_group) => moveable_group.modelos.filter((moveable_model) => moveable_model.modelo === model.modelo).length > 0)
-                            .map((moveable_group) => `${moveable_index}-${moveable_group.id}-${model.modelo}`)
-                        )
-                        .reduce((moveable, value) => [...moveable, ...value], []),
                       label: `${task.quantidade}\r\n\r\n${task.lote}`,
                       style: {
                         "border-radius": 0
                       },
-                      a: {
-                        start: new Date(task.metadados.date_simulada_de_inicio
-                              ? task.metadados.data_simulada_de_inicio.slice(0, 10)
-                              : task.metadados.data_inicio.split("/").reverse().join("-")
-                            ),
-                        end:
-                            new Date(task.metadados.data_simulada_de_fim
-                              ? task.metadados.data_simulada_de_fim.slice(0, 10)
-                              : task.metadados.data_fim
-                                ? task.metadados.data_fim.slice(0, 10)
-                                : task.metadados.data_inicio.split("/").reverse().join("-")
-                            )
-                      },
                       time: {
-                        start: plugin
-                          .api
-                          .date(
-                            new Date(task.metadados.date_simulada_de_inicio
-                              ? task.metadados.data_simulada_de_inicio.slice(0, 10)
-                              : task.metadados.data_inicio.split("/").reverse().join("-")
-                            ).getTime()
-                          )
-                          .startOf("day")
-                          .valueOf(),
-                        end: plugin
-                          .api
-                          .date(
-                            new Date(task.metadados.data_simulada_de_fim
-                              ? task.metadados.data_simulada_de_fim.slice(0, 10)
-                              : task.metadados.data_fim
-                                ? task.metadados.data_fim.slice(0, 10)
-                                : task.metadados.data_inicio.split("/").reverse().join("-")
-                            ).getTime()
-                          )
-                          .endOf("day")
-                          .valueOf()
+                        start: new Date(task.metadados.data_inicio).getTime(),
+                        end: new Date(task.metadados.entrega).getTime()
                       }
                     }
                   }), {})
@@ -110,10 +67,10 @@ export default {
             }), {})
         },
         list: {
-          toggle: {
-            display: false
-          },
           columns: {
+            resizer: {
+              inRealTime: true
+            },
             data: {
               user: {
                 id: "user",
@@ -139,6 +96,7 @@ export default {
                 id: "model",
                 data: "model",
                 width: 100,
+                expander: true,
                 isHTML: true,
                 header: {
                   content: "Modelo"
@@ -149,53 +107,47 @@ export default {
           rows: json.gerentes
             .reduce((users, user, index) => ({
               ...users,
-              [index]: {
-                id: index,
-                expanded: true,
-                user: `<div class="row__user"><i class="fas fa-user"></i><div>${user.nome}</div></div>`,
-                group: null,
-                model: null
-              },
-              ...user.celula_grupos.reduce((groups, group) => ({
-                ...groups,
-                [`${index}-${group.id}`]: {
-                  id: `${index}-${group.id}`,
-                  parentId: index,
+                [index]: {
+                  id: index,
                   expanded: true,
-                  user: null,
-                  group: `<div class="row__group">GRUPO ${group.id}</div>`,
+                  height: 40,
+                  user: `<div class="row__user"><i class="fas fa-user"></i><div>${user.nome}</div></div>`,
+                  group: null,
                   model: null
                 },
-                ...group.modelos.reduce((models, model) => ({
-                  ...models,
+                ...user.celula_grupos.reduce((groups, group) => ({
+                  ...groups,
+                  [`${index}-${group.id}`]: {
+                    id: `${index}-${group.id}`,
+                    parentId: index,
+                    expanded: true,
+                    height: 40,
+                    user: null,
+                    group: `<div class="row__group">GRUPO ${group.id}</div>`,
+                    model: null
+                  },
+                  ...group.modelos.reduce((models, model) => ({
+                    ...models,
                     [`${index}-${group.id}-${model.modelo}`]: {
                       id: `${index}-${group.id}-${model.modelo}`,
                       parentId: `${index}-${group.id}`,
-                      height: 60,
                       user: null,
                       group: null,
                       model: `<div class="row__model"><div class="title">MODELO ${model.modelo}</div><div class="subtitle">Quantidade</div><div class="subtitle">Lote</div></div>`
                     }
+                  }), {})
                 }), {})
-              }), {})
-            }), {})
-        },
-        actions: {
-          "chart-timeline-items-row-item": [
-            () => ({
-              update: (element, data) =>
-                element.style.background = week_colour(plugin.api.date(data.item.time.start).startOf("week").week()),
-              destroy: (element) =>
-                element.style.background = undefined
-            })
-          ]
+            }), {}),
+          rowHeight: 60,
+          toggle: {
+            display: false
+          }
         },
         plugins: [
           ItemMovement({
             moveable: true,
             resizeable: true,
-            collisionDetection: false,
-            ghostNode: true,
+            collisionDetection: true,
             snapStart: (time, diff) =>
               plugin
                 .api
@@ -203,16 +155,12 @@ export default {
                 .add(diff, "milliseconds")
                 .startOf("day")
                 .valueOf(),
-            snapEnd: (time, diff) =>
+            snapEnd: (time, diff, item) =>
               plugin
                 .api
-                .date(time)
-                .add(diff, "milliseconds")
-                .endOf("day")
-                .valueOf()
-          }),
-          WeekendHighlight({
-            weekdays: [6, 0]
+                .date(time + diff)
+                .startOf("day")
+                .diff(item.time.start, "days")
           })
         ]
       }
@@ -240,10 +188,6 @@ export default {
 </script>
 
 <style lang="scss">
-.gantt-schedule-timeline-calendar__chart-timeline-grid-row-block--weekend {
-  background: lightgray !important;
-}
-
 .gantt-schedule-timeline-calendar__chart-timeline-items-row-item-label {
   line-height: 9px;
   margin-top: 1px;
