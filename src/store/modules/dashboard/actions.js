@@ -21,7 +21,8 @@ export const loadTasks = async ({ commit }) => {
         'Content-Type': 'application/json'
       },
       method: 'GET',
-      url: '/search/787'
+      url: '/search/787',
+      withCredentials: true
     }))
   } catch (error) {
     console.error(error)
@@ -37,7 +38,8 @@ export const simulateTask = async ({ commit }, data) => {
         'Content-Type': 'application/json'
       },
       method: 'POST',
-      url: '/load-simulation'
+      url: '/load-simulation',
+      withCredentials: true
     }))
   } catch (error) {
     console.error(error)
