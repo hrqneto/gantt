@@ -16,7 +16,7 @@ export const setGridRows = ({ commit }, data) => {
 export const loadTasks = async ({ commit }) => {
   try {
     commit(types.LOAD_TASKS, await axios.request({
-      baseURL: 'https://10.100.0.151:3020/service/v1/production-plan/',
+      baseURL: 'http://10.100.0.151:3020/service/v1/production-plan/',
       headers: {
         'Content-Type': 'application/json'
       },
@@ -31,7 +31,7 @@ export const loadTasks = async ({ commit }) => {
 export const simulateTask = async ({ commit }, data) => {
   try {
     commit(types.LOAD_TASKS, await axios.request({
-      baseURL: 'https://10.100.0.151:3020/service/v1/production-plan/',
+      baseURL: 'http://10.100.0.151:3020/service/v1/production-plan/',
       data,
       headers: {
         'Content-Type': 'application/json'
