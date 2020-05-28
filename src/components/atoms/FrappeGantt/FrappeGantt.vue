@@ -1,38 +1,49 @@
 <template>
   <div id="app">
-    <GSTC :config="config" @state="onState" />
+    <GSTC v-if="getTasks" :config="config" @state="onState" />
   </div>
 </template>
 
 <script>
-import plugin from "gantt-schedule-timeline-calendar";
-import ItemMovement from "gantt-schedule-timeline-calendar/dist/ItemMovement.plugin";
-import WeekendHighlight from "gantt-schedule-timeline-calendar/dist/WeekendHighlight.plugin.js";
-import GSTC from "vue-gantt-schedule-timeline-calendar";
+import { mapActions, mapGetters } from 'vuex'
+import plugin from 'gantt-schedule-timeline-calendar'
+import CalendarScroll from 'gantt-schedule-timeline-calendar/dist/CalendarScroll.plugin'
+import ItemMovement from 'gantt-schedule-timeline-calendar/dist/ItemMovement.plugin'
+import WeekendHighlight from 'gantt-schedule-timeline-calendar/dist/WeekendHighlight.plugin'
+import GSTC from 'vue-gantt-schedule-timeline-calendar'
 
-import json from "../../../assets/json_response.json";
-
-const subs = [];
 const week_colour = (week) =>
   week % 5 === 0
-    ? "red"
+    ? 'red'
   : week % 5 === 1
-    ? "darkgreen"
+    ? 'darkgreen'
   : week % 5 === 2
-    ? "indigo"
+    ? 'indigo'
   : week % 5 === 3
-    ? "orange"
-  : "darkmagenta";
+    ? 'orange'
+  : 'darkmagenta'
 
 export default {
-  name: "app",
+  name: 'frappe-gantt',
+
   components: {
     GSTC
   },
-  data() {
+
+  data () {
     return {
-      json,
-      config: {
+      subscriptions: []
+    }
+  },
+
+  computed: {
+    ...mapGetters({
+      getPeriodMode: 'dashboard/getPeriodMode',
+      getTasks: 'dashboard/getTasks'
+    }),
+
+    config: function () {
+      return {
         height: 500,
         locale: {
           name: "pt-br",
@@ -43,19 +54,39 @@ export default {
           monthsShort: ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"]
         },
         chart: {
-          items: json.gerentes
+          /*calendar: {
+            expand: true,
+            levels: [
+              {
+                main: true,
+                formats: [
+                  {
+                    zoomTo: 21,
+                    period: 'day',
+                    className: 'gstc-date-medium gstc-date-left',
+                    format() {
+                      return 'TESTE'
+                    }
+                  },
+                ]
+              }
+            ]
+          },*/
+          items: this.getTasks?.gerentes
             .reduce((users, user, index) => ({
               ...users,
-              ...user.celula_grupos.reduce((groups, group) => ({
+              ...user.celula_grupos.reduce((groups, group, group_index) => ({
                 ...groups,
-                ...group.modelos.reduce((models, model) => ({
+                ...group.modelos.reduce((models, model, model_index) => ({
                   ...models,
-                  ...model.tarefas_processos.reduce((tasks, task) => ({
+                  ...model.tarefas_processos.reduce((tasks, task, task_index) => ({
                     ...tasks,
                     [`${index}-${group.id}-${model.modelo}-${task.lote}`]: {
                       id: `${index}-${group.id}-${model.modelo}-${task.lote}`,
                       rowId: `${index}-${group.id}-${model.modelo}`,
-                      moveable: json.gerentes
+                      task: task,
+                      indexes: [index, group_index, model_index, task_index],
+                      moveable: this.getTasks?.gerentes
                         .map((moveable_user, moveable_index) =>
                           moveable_user.celula_grupos
                             .filter((moveable_group) => moveable_group.modelos.filter((moveable_model) => moveable_model.modelo === model.modelo).length > 0)
@@ -66,40 +97,21 @@ export default {
                       style: {
                         "border-radius": 0
                       },
-                      a: {
-                        start: new Date(task.metadados.date_simulada_de_inicio
-                              ? task.metadados.data_simulada_de_inicio.slice(0, 10)
-                              : task.metadados.data_inicio.split("/").reverse().join("-")
-                            ),
-                        end:
-                            new Date(task.metadados.data_simulada_de_fim
-                              ? task.metadados.data_simulada_de_fim.slice(0, 10)
-                              : task.metadados.data_fim
-                                ? task.metadados.data_fim.slice(0, 10)
-                                : task.metadados.data_inicio.split("/").reverse().join("-")
-                            )
-                      },
                       time: {
                         start: plugin
                           .api
                           .date(
-                            new Date(task.metadados.date_simulada_de_inicio
-                              ? task.metadados.data_simulada_de_inicio.slice(0, 10)
-                              : task.metadados.data_inicio.split("/").reverse().join("-")
-                            ).getTime()
+                            new Date(task.data).getTime()
                           )
+                          .add(1, "day")
                           .startOf("day")
                           .valueOf(),
-                        end: plugin
+                         end: plugin
                           .api
                           .date(
-                            new Date(task.metadados.data_simulada_de_fim
-                              ? task.metadados.data_simulada_de_fim.slice(0, 10)
-                              : task.metadados.data_fim
-                                ? task.metadados.data_fim.slice(0, 10)
-                                : task.metadados.data_inicio.split("/").reverse().join("-")
-                            ).getTime()
+                            new Date(task.data).getTime()
                           )
+                          .add(1, "day")
                           .endOf("day")
                           .valueOf()
                       }
@@ -108,7 +120,7 @@ export default {
                 }), {})
               }), {})
             }), {})
-        },
+         },
         list: {
           toggle: {
             display: false
@@ -146,7 +158,7 @@ export default {
               }
             }
           },
-          rows: json.gerentes
+          rows: this.getTasks?.gerentes
             .reduce((users, user, index) => ({
               ...users,
               [index]: {
@@ -168,29 +180,54 @@ export default {
                 },
                 ...group.modelos.reduce((models, model) => ({
                   ...models,
-                    [`${index}-${group.id}-${model.modelo}`]: {
-                      id: `${index}-${group.id}-${model.modelo}`,
-                      parentId: `${index}-${group.id}`,
-                      height: 60,
-                      user: null,
-                      group: null,
-                      model: `<div class="row__model"><div class="title">MODELO ${model.modelo}</div><div class="subtitle">Quantidade</div><div class="subtitle">Lote</div></div>`
-                    }
+                  [`${index}-${group.id}-${model.modelo}`]: {
+                    id: `${index}-${group.id}-${model.modelo}`,
+                    parentId: `${index}-${group.id}`,
+                    height: 60,
+                    user: null,
+                    group: null,
+                    model: `<div class="row__model"><div class="title">MODELO ${model.modelo}</div><div class="subtitle">Quantidade</div><div class="subtitle">Lote</div></div>`
+                  }
                 }), {})
               }), {})
             }), {})
         },
         actions: {
           "chart-timeline-items-row-item": [
-            () => ({
-              update: (element, data) =>
-                element.style.background = week_colour(plugin.api.date(data.item.time.start).startOf("week").week()),
-              destroy: (element) =>
-                element.style.background = undefined
-            })
+            (element, data) => {
+              element.style.background = week_colour(plugin.api.date(data.item.time.start).startOf("week").week())
+              return {
+                update: async (element, data) => {
+                  if (data.item.isMoving || data.item.isResizing) {
+                    console.log(data);
+                    element.style.background = week_colour(plugin.api.date(data.item.time.start).startOf("week").week())
+                    data.item.label = ""
+                    this.simulateTask({
+                      plan_id: data.item.task.metadados.plano,
+                      tabela_temp_nome: "MOVE_EVENT",
+                      tarefas_processos: [
+                        {
+                          id_tarefa: data.item.task.id ?? "",
+                          cel_codigo_origem: data.item.task.metadados.celula ?? "",
+                          ipl_ordem: data.item.task.metadados.ordem_de_producao ?? "",
+                          ipl_dtinicio: data.item.task.data ?? "",
+                          bal_seq: data.item.task.metadados.balanceamento ?? "",
+                          cur_codigo: data.item.task.metadados.curva_de_producao ?? "",
+                          ipl_perccurva: data.item.task.metadados.percentual_curva ?? "",
+                          ipl_seq_anterior_destino: data.item.task.sequencia ?? "",
+                          cel_codigo_destino: data.item.task.metadados.celula ?? "",
+                          ipl_data_destino: plugin.api.date(data.item.time.start).format("DD/MM/YYYY")
+                        }
+                      ]
+                    });
+                  }
+                }
+              }
+            }
           ]
         },
         plugins: [
+          CalendarScroll(),
           ItemMovement({
             moveable: true,
             resizeable: true,
@@ -204,37 +241,46 @@ export default {
                 .startOf("day")
                 .valueOf(),
             snapEnd: (time, diff) =>
-              plugin
-                .api
+              plugin 
+                .api 
                 .date(time)
                 .add(diff, "milliseconds")
                 .endOf("day")
                 .valueOf()
           }),
-          WeekendHighlight({
-            weekdays: [6, 0]
-          })
+          WeekendHighlight()
         ]
       }
     }
   },
+
   methods: {
-    onState(state) {
+    ...mapActions({
+      setPeriodMode: 'dashboard/setPeriodMode',
+      loadTasks: 'dashboard/loadTasks',
+      simulateTask: 'dashboard/simulateTask'
+    }),
+
+    onState (state) {
       this.state = state;
-      subs.push(
-        state.subscribe("config.chart.items.1", item => {
-          console.log("item 1 changed", item);
+      this.subscriptions.push(
+        state.subscribe('config.plugin.ItemMovement', itemMovement => {
+          if (itemMovement?.item) {
+            state.update(`config.chart.items.${itemMovement.item.id}.isMoving`, itemMovement.item.moving)
+            state.update(`config.chart.items.${itemMovement.item.id}.isResizing`, itemMovement.item.resizing)
+            state.update(`config.chart.items.${itemMovement.item.id}.isWaiting`, itemMovement.item.waiting)
+          }
         })
-      );
-      subs.push(
-        state.subscribe("config.list.rows.1", row => {
-          console.log("row 1 changed", row);
-        })
-      );
+      )
     }
   },
+
   beforeDestroy() {
-    subs.forEach(unsub => unsub());
+    this.subscriptions.forEach(unsubscribe => unsubscribe())
+  },
+
+  async created() {
+    await this.loadTasks()
   }
 }
 </script>

@@ -86,22 +86,18 @@ export default {
       periods: [
         {
           id: '1',
-          label: 'Quarto dia'
+          label: 'Hora'
         },
         {
           id: '2',
-          label: 'Meio dia'
-        },
-        {
-          id: '3',
           label: 'Dia'
         },
         {
-          id: '4',
+          id: '3',
           label: 'Semana'
         },
         {
-          id: '5',
+          id: '4',
           label: 'Mês'
         }
       ]
@@ -116,8 +112,7 @@ export default {
     }),
 
     castPeriod (period) {
-      if (period === 'Quarto dia') return 'Quarter Day'
-      if (period === 'Meio dia') return 'Half Day'
+      if (period === 'Hora') return 'hour'
       if (period === 'Dia') return 'day'
       if (period === 'Semana') return 'week'
       if (period === 'Mês') return 'month'

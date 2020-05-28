@@ -6,14 +6,7 @@
       <div class="cointainer-gantt">
         <div class="left-text-1" v-if="getCell.includes('sc1')">
           <p class="sc1">SC1</p>
-          <frappe-gantt
-            class="gantt-graph"
-            :view-mode="getPeriodMode"
-            :tasks="getTasks"
-            @task-updated="debugEventLog.push($event)"
-            @task-date-updated="debugEventLog.push($event)"
-            @task-progress-change="debugEventLog.push($event)"
-          ></frappe-gantt>
+          <frappe-gantt class="gantt-graph"></frappe-gantt>
         </div>
       </div>
     </div>
@@ -25,7 +18,6 @@ import { mapGetters } from 'vuex'
 import Navbar from '@/components/molecules/Navbar'
 import DashboardHeader from '@/components/molecules/DashboardHeader'
 import FrappeGantt from '@/components/atoms/FrappeGantt'
-import uuidv4 from 'uuid/v4';
 export default {
   name: 'dashboard',
 
@@ -37,25 +29,8 @@ export default {
 
   computed: {
     ...mapGetters({
-      getPeriodMode: 'dashboard/getPeriodMode',
-      getCell: 'dashboard/getCell',
-      getTasks: 'dashboard/getTasks',
-      getGridRows: 'dashboard/getGridRows'
-    }),
-    
-  },
-
-  methods: {
-    addRandomTask () {
-      const id = uuidv4();
-      this.tasks.push({
-        id: id,
-        name: id,
-        start: '2019-01-01',
-        end: '2019-01-05',
-        progress: Math.random() * 100,
-      });
-    }
+      getCell: 'dashboard/getCell'
+    })
   }
 }
 </script>
