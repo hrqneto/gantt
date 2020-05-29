@@ -46,7 +46,9 @@ export const simulateTask = async ({ commit }, data) => {
       url: '/load-simulation'
     }))
   } catch (error) {
-    console.error(error)
+    tasks.gerentes[data.indexes[0]].celula_grupos[data.indexes[1]].modelos[data.indexes[2]].tarefas_processos[data.indexes[3]].data = data.tarefas_processos.ipl_data_destino
+    tasks.gerentes[data.indexes[0]].celula_grupos[data.indexes[1]].modelos[data.indexes[2]].tarefas_processos[data.indexes[3]].metadados.data_fim = data.tarefas_processos.ipl_data_fim
+    tasks.gerentes[data.indexes[0]].celula_grupos[data.indexes[1]].modelos[data.indexes[2]].tarefas_processos[data.indexes[3]].quantidade = Math.floor(Math.random() * 1001)
     commit(types.LOAD_TASKS, tasks)
   }
 }

@@ -186,7 +186,11 @@ export default {
                          end: plugin
                           .api
                           .date(
-                            new Date(task.data.split('/').reverse().join('-')).getTime()
+                            new Date(
+                              task.metadados.data_fim
+                                ? task.metadados.data_fim.slice(0, 10)
+                                : task.data.split('/').reverse().join('-')
+                            ).getTime()
                           )
                           .add(1, "day")
                           .endOf("day")
@@ -272,6 +276,7 @@ export default {
         actions: {
           "chart-timeline-items-row-item": [
             (element, data) => {
+              element.style.background = this.weekColour(plugin.api.date(data.item.time.start).startOf('week').week())
               tippy(element, {
                 allowHTML: true,
                 theme: 'material',
@@ -281,31 +286,32 @@ export default {
                 `
               })
 
-              element.style.background = this.weekColour(plugin.api.date(data.item.time.start).startOf("week").week())
-
               return {
                 update: async (element, data) => {
-                  if (data.item.isMoving || data.item.isResizing) {
-                    element.style.background = this.weekColour(plugin.api.date(data.item.time.start).startOf("week").week())
+                  element.style.background = this.weekColour(plugin.api.date(data.item.time.start).startOf('week').week())
+
+                  if ((data.item.isMoving && !element.classList.contains('moving')) || (data.item.isResizing && !element.classList.contains('resizing'))) {
+                    element.classList.add(data.item.isMoving ? 'moving' : 'resizing')
+                  } else if ((!data.item.isMoving && element.classList.contains('moving')) || (!data.item.isResizing && element.classList.contains('resizing'))) {
+                    element.classList.remove(element.classList.contains('moving') ? 'moving' : 'resizing')
                     this.simulateTask({
                       indexes: data.item.indexes,
                       plan_id: data.item.task.metadados.plano,
-                      tabela_temp_nome: "MOVE_EVENT",
-                      tarefas_processos: [
-                        {
-                          id_tarefa: data.item.task.id ?? "",
-                          cel_codigo_origem: data.item.task.metadados.celula ?? "",
-                          ipl_ordem: data.item.task.metadados.ordem_de_producao ?? "",
-                          ipl_dtinicio: data.item.task.data ?? "",
-                          bal_seq: data.item.task.metadados.balanceamento ?? "",
-                          cur_codigo: data.item.task.metadados.curva_de_producao ?? "",
-                          ipl_perccurva: data.item.task.metadados.percentual_curva ?? "",
-                          ipl_seq_anterior_destino: data.item.task.sequencia ?? "",
-                          cel_codigo_destino: data.item.task.metadados.celula ?? "",
-                          ipl_data_destino: plugin.api.date(data.item.time.start).format("DD/MM/YYYY")
-                        }
-                      ]
-                    });
+                      tabela_temp_nome: 'MOVE_RESIZE_EVENT',
+                      tarefas_processos: {
+                        id_tarefa: data.item.task.id ?? '',
+                        cel_codigo_origem: data.item.task.metadados.celula ?? '',
+                        ipl_ordem: data.item.task.metadados.ordem_de_producao ?? '',
+                        ipl_dtinicio: data.item.task.data ?? '',
+                        bal_seq: data.item.task.metadados.balanceamento ?? '',
+                        cur_codigo: data.item.task.metadados.curva_de_producao ?? '',
+                        ipl_perccurva: data.item.task.metadados.percentual_curva ?? '',
+                        ipl_seq_anterior_destino: data.item.task.sequencia ?? '',
+                        cel_codigo_destino: data.item.task.metadados.celula ?? '',
+                        ipl_data_destino: plugin.api.date(data.item.time.start).format('DD/MM/YYYY'),
+                        ipl_data_fim: plugin.api.date(data.item.time.end).format('YYYY-MM-DD')
+                      }
+                    })
                   }
                 }
               }
