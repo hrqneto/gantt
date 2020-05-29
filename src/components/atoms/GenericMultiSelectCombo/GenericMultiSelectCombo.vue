@@ -27,7 +27,7 @@ export default {
 
   data () {
     return {
-      selected: ['sc1']
+      selected: []
     }
   },
 

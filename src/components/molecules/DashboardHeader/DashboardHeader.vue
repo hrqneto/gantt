@@ -16,7 +16,7 @@
         color="gray"
         size="small"
         :is-bold="true"
-      >Células:</generic-text>
+      >Gerentes:</generic-text>
       <generic-multi-select-combo
         :items="items"
         @selected="setSelectedCel($event)"
@@ -42,7 +42,7 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex'
+import { mapActions, mapGetters } from 'vuex'
 import GenericTitle from '@/components/atoms/GenericTitle'
 import GenericSubTitle from '@/components/atoms/GenericSubTitle'
 import GenericText from '@/components/atoms/GenericText'
@@ -59,30 +59,22 @@ export default {
     'generic-radio-button': GenericRadioButton
   },
 
+  computed: {
+    ...mapGetters({
+      getTasks: 'dashboard/getTasks',
+      getFilter: 'dashboard/getFilter'
+    }),
+    items () {
+      return this.getTasks?.gerentes.map((user, index) => ({
+        id: index,
+        label: user.nome,
+        value: user.nome
+      }))
+    }
+  },
+
   data () {
     return {
-      items: [
-        {
-          id: '1',
-          label: 'SC1',
-          value: 'sc1'
-        },
-        {
-          id: '2',
-          label: 'SC2',
-          value: 'sc2'
-        },
-        {
-          id: '3',
-          label: 'SC3',
-          value: 'sc3'
-        },
-        {
-          id: '4',
-          label: 'SC4',
-          value: 'sc4'
-        }
-      ],
       periods: [
         {
           id: '1',
@@ -112,6 +104,7 @@ export default {
     ...mapActions({
       setPeriodMode: 'dashboard/setPeriodMode',
       setCell: 'dashboard/setCell',
+      setFilter: 'dashboard/setFilter',
       setGridRows: 'dashboard/setGridRows'
     }),
 
@@ -129,7 +122,7 @@ export default {
     },
 
     setSelectedCel (cel) {
-      this.setCell(cel)
+      this.setFilter(cel)
     },
 
     set2Grid () {

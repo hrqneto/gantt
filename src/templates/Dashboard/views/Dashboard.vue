@@ -4,7 +4,7 @@
     <dashboard-header></dashboard-header>
     <div :class="grid">
       <div class="cointainer-gantt">
-        <div class="left-text-1" v-if="getCell.includes('sc1')">
+        <div class="left-text-1">
           <p class="sc1">SC1</p>
           <frappe-gantt class="gantt-graph"></frappe-gantt>
         </div>

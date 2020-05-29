@@ -14,6 +14,10 @@ export const setGridRows = ({ commit }, data) => {
   commit(types.SET_GRID_ROWS, data)
 }
 
+export const setFilter = ({ commit }, data) => {
+  commit(types.SET_FILTER, data)
+}
+
 export const loadTasks = async ({ commit }) => {
   try {
     throw new Error("SKIPPING")

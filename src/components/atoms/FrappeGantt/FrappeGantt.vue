@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <GSTC v-if="getTasks" :config="config" @state="onState" />
+    <GSTC v-if="getTasks" :config="config" :key="getFilter.join('-')-getPeriodMode" @state="onState" />
   </div>
 </template>
 
@@ -26,6 +26,7 @@ export default {
   computed: {
     ...mapGetters({
       getPeriodMode: 'dashboard/getPeriodMode',
+      getFilter: 'dashboard/getFilter',
       getTasks: 'dashboard/getTasks'
     }),
     businessDays () {
@@ -71,9 +72,9 @@ export default {
                     period: 'week',
                     format: (api) => api.vido.html`
                       <div class="colour-${this.weekColour(api.timeStart.format('ww'))}">
-                        <span>${api.timeStart.format('ww')}ª SEMANA (${api.timeStart.format('YYYY')})</span>
+                        <span>${api.timeStart.format('ww')}ª SEMANA (${api.timeStart.format('MMMM/YYYY')})</span>
                         <span style="margin-left: 5px; margin-right: 5px">|</span>
-                        <span>${this.businessDays[api.timeStart.format('w')]} DIAS ÚTEIS</span>
+                        <span>${this.businessDays[api.timeStart.format('w')] ?? 'X'} DIAS ÚTEIS</span>
                       </div>
                     `
                   },
@@ -82,7 +83,7 @@ export default {
                     period: 'week',
                     format: (api) => api.vido.html`
                       <div class="colour-${this.weekColour(api.timeStart.format('ww'))}">
-                        <span>${this.businessDays[api.timeStart.format('w')]} DIAS ÚTEIS</span>
+                        <span>${this.businessDays[api.timeStart.format('w')] ?? 'X'} DIAS ÚTEIS</span>
                       </div>
                     `
                   },
@@ -124,7 +125,7 @@ export default {
                     default: true,
                     format: (api) => api.vido.html`
                       <div class="${api.className}-content gstc-date-top">${api.timeStart.format('DD')} - ${api.timeEnd.format('DD')}</div>
-                      <div class="${api.className}-content gstc-date-small">${api.timeStart.format('ww')}ª SEMANA (${api.timeStart.format('YYYY')})</div>
+                      <div class="${api.className}-content gstc-date-small">${api.timeStart.format('ww')}ª SEMANA (${api.timeStart.format('MM/YYYY')})</div>
                     `
                   },
                   {
@@ -150,6 +151,7 @@ export default {
             ]
           },
           items: this.getTasks?.gerentes
+            .filter((user) => this.getFilter.length === 0 ? true : this.getFilter.includes(user.nome))
             .reduce((users, user, index) => ({
               ...users,
               ...user.celula_grupos.reduce((groups, group, group_index) => ({
@@ -240,6 +242,7 @@ export default {
             }
           },
           rows: this.getTasks?.gerentes
+            .filter((user) => this.getFilter.length === 0 ? true : this.getFilter.includes(user.nome))
             .reduce((users, user, index) => ({
               ...users,
               [index]: {
