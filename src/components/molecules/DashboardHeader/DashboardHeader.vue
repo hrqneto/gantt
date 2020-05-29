@@ -99,6 +99,10 @@ export default {
         {
           id: '4',
           label: 'Mês'
+        },
+        {
+          id: '5',
+          label: 'Ano'
         }
       ]
     }
@@ -116,6 +120,7 @@ export default {
       if (period === 'Dia') return 'day'
       if (period === 'Semana') return 'week'
       if (period === 'Mês') return 'month'
+      if (period === 'Ano') return 'year'
       return period
     },
 

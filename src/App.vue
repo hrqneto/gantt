@@ -10,6 +10,7 @@ export default {
 
 <style lang="scss">
   @import "~@fortawesome/fontawesome-free/css/all.min.css";
+  @import "~tippy.js/dist/tippy.css";
   @import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
 
   $gray: #C0C4CC;

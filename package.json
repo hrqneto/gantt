@@ -17,6 +17,7 @@
     "element-ui": "^2.13.1",
     "frappe-gantt": "^0.3.0",
     "gantt-schedule-timeline-calendar": "2.6.8",
+    "tippy.js": "^6.2.3",
     "uuidv4": "^6.0.7",
     "vue": "^2.6.11",
     "vue-gantt-schedule-timeline-calendar": "^1.0.33",

@@ -6,42 +6,46 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex'
+import tippy from 'tippy.js'
 import plugin from 'gantt-schedule-timeline-calendar'
 import CalendarScroll from 'gantt-schedule-timeline-calendar/dist/CalendarScroll.plugin'
 import ItemMovement from 'gantt-schedule-timeline-calendar/dist/ItemMovement.plugin'
 import WeekendHighlight from 'gantt-schedule-timeline-calendar/dist/WeekendHighlight.plugin'
 import GSTC from 'vue-gantt-schedule-timeline-calendar'
 
-const week_colour = (week) =>
-  week % 5 === 0
-    ? 'red'
-  : week % 5 === 1
-    ? 'darkgreen'
-  : week % 5 === 2
-    ? 'indigo'
-  : week % 5 === 3
-    ? 'orange'
-  : 'darkmagenta'
-
 export default {
   name: 'frappe-gantt',
-
   components: {
     GSTC
   },
-
   data () {
     return {
       subscriptions: []
     }
   },
-
   computed: {
     ...mapGetters({
       getPeriodMode: 'dashboard/getPeriodMode',
       getTasks: 'dashboard/getTasks'
     }),
-
+    businessDays () {
+      return this.getTasks?.gerentes.reduce((users, user) => ({
+        ...users,
+        ...user.celula_grupos.reduce((groups, group) => ({
+          ...groups,
+          ...group.modelos.reduce((models, model) => ({
+            ...models,
+            ...model.tarefas_processos.reduce((tasks, task) => {
+              if (!Object.keys(tasks).includes(task.semana)) {
+                return { ...tasks, [task.semana]: task.dias_uteis_semana }
+              } else {
+                return tasks
+              }
+            }, {})
+          }), {})
+        }), {})
+      }), {})
+    },
     config: function () {
       return {
         height: 500,
@@ -54,24 +58,97 @@ export default {
           monthsShort: ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"]
         },
         chart: {
-          /*calendar: {
+          time: {
+            period: this.getPeriodMode
+          },
+          calendar: {
             expand: true,
             levels: [
+              {
+                formats: [
+                  {
+                    zoomTo: 20,
+                    period: 'week',
+                    format: (api) => api.vido.html`
+                      <div class="colour-${this.weekColour(api.timeStart.format('ww'))}">
+                        <span>${api.timeStart.format('ww')}ª SEMANA (${api.timeStart.format('YYYY')})</span>
+                        <span style="margin-left: 5px; margin-right: 5px">|</span>
+                        <span>${this.businessDays[api.timeStart.format('w')]} DIAS ÚTEIS</span>
+                      </div>
+                    `
+                  },
+                  {
+                    zoomTo: 22,
+                    period: 'week',
+                    format: (api) => api.vido.html`
+                      <div class="colour-${this.weekColour(api.timeStart.format('ww'))}">
+                        <span>${this.businessDays[api.timeStart.format('w')]} DIAS ÚTEIS</span>
+                      </div>
+                    `
+                  },
+                  {
+                    zoomTo: 24,
+                    period: 'week',
+                    format: (api) => api.vido.html`
+                      <div class="colour-${this.weekColour(api.timeStart.format('ww'))}">
+                        <span>${api.timeStart.format('ww')}</span>
+                      </div>
+                    `
+                  }
+                ]
+              },
               {
                 main: true,
                 formats: [
                   {
-                    zoomTo: 21,
+                    zoomTo: 14,
+                    period: 'hour',
+                    default: true,
+                    format: (api) => api.vido.html`
+                      <div class="${api.className}-content gstc-date-top">${api.timeStart.format('HH:00 - HH:59')}</div>
+                      <div class="${api.className}-content gstc-date-small">${api.timeStart.format('DD')} de ${api.timeStart.format('MMMM')} de ${api.timeStart.format('YYYY')}</div>
+                    `
+                  },
+                  {
+                    zoomTo: 20,
                     period: 'day',
-                    className: 'gstc-date-medium gstc-date-left',
-                    format() {
-                      return 'TESTE'
-                    }
+                    default: true,
+                    format: (api) => api.vido.html`
+                      <div class="${api.className}-content gstc-date-top">${api.timeStart.format('DD')}</div>
+                      <div class="${api.className}-content gstc-date-small">${api.timeStart.format('dddd')}</div>
+                    `
+                  },
+                  {
+                    zoomTo: 22,
+                    period: 'week',
+                    default: true,
+                    format: (api) => api.vido.html`
+                      <div class="${api.className}-content gstc-date-top">${api.timeStart.format('DD')} - ${api.timeEnd.format('DD')}</div>
+                      <div class="${api.className}-content gstc-date-small">${api.timeStart.format('ww')}ª SEMANA (${api.timeStart.format('YYYY')})</div>
+                    `
+                  },
+                  {
+                    zoomTo: 23,
+                    period: 'month',
+                    default: true,
+                    format: (api) => api.vido.html`
+                      <div class="${api.className}-content gstc-date-top">${api.timeStart.format('MMMM')}</div>
+                      <div class="${api.className}-content gstc-date-small">${api.timeStart.format('YYYY')}</div>
+                    `
+                  },
+                  {
+                    zoomTo: 24,
+                    period: 'year',
+                    default: true,
+                    className: 'gstc-date-medium',
+                    format: (api) => api.vido.html`
+                      <div class="${api.className}-content gstc-date-top">${api.timeStart.format('YYYY')}</div>
+                    `
                   },
                 ]
               }
             ]
-          },*/
+          },
           items: this.getTasks?.gerentes
             .reduce((users, user, index) => ({
               ...users,
@@ -101,7 +178,7 @@ export default {
                         start: plugin
                           .api
                           .date(
-                            new Date(task.data).getTime()
+                            new Date(task.data.split('/').reverse().join('-')).getTime()
                           )
                           .add(1, "day")
                           .startOf("day")
@@ -109,7 +186,7 @@ export default {
                          end: plugin
                           .api
                           .date(
-                            new Date(task.data).getTime()
+                            new Date(task.data.split('/').reverse().join('-')).getTime()
                           )
                           .add(1, "day")
                           .endOf("day")
@@ -120,7 +197,7 @@ export default {
                 }), {})
               }), {})
             }), {})
-         },
+        },
         list: {
           toggle: {
             display: false
@@ -195,14 +272,23 @@ export default {
         actions: {
           "chart-timeline-items-row-item": [
             (element, data) => {
-              element.style.background = week_colour(plugin.api.date(data.item.time.start).startOf("week").week())
+              tippy(element, {
+                allowHTML: true,
+                theme: 'material',
+                content: `
+                  <div>Curva de Produção: ${data.item.task.metadados.curva_de_producao}</div>
+                  <div>Plano: ${data.item.task.metadados.plano}</div>
+                `
+              })
+
+              element.style.background = this.weekColour(plugin.api.date(data.item.time.start).startOf("week").week())
+
               return {
                 update: async (element, data) => {
                   if (data.item.isMoving || data.item.isResizing) {
-                    console.log(data);
-                    element.style.background = week_colour(plugin.api.date(data.item.time.start).startOf("week").week())
-                    data.item.label = ""
+                    element.style.background = this.weekColour(plugin.api.date(data.item.time.start).startOf("week").week())
                     this.simulateTask({
+                      indexes: data.item.indexes,
                       plan_id: data.item.task.metadados.plano,
                       tabela_temp_nome: "MOVE_EVENT",
                       tarefas_processos: [
@@ -253,14 +339,12 @@ export default {
       }
     }
   },
-
   methods: {
     ...mapActions({
       setPeriodMode: 'dashboard/setPeriodMode',
       loadTasks: 'dashboard/loadTasks',
       simulateTask: 'dashboard/simulateTask'
     }),
-
     onState (state) {
       this.state = state;
       this.subscriptions.push(
@@ -272,20 +356,50 @@ export default {
           }
         })
       )
+    },
+    weekColour (week) {
+      return week % 5 === 0 ? 'red' : week % 5 === 1 ? 'darkgreen' : week % 5 === 2 ? 'indigo' : week % 5 === 3 ? 'orange' : 'darkmagenta'
     }
   },
-
-  beforeDestroy() {
+  beforeDestroy () {
     this.subscriptions.forEach(unsubscribe => unsubscribe())
   },
-
-  async created() {
+  async created () {
     await this.loadTasks()
   }
 }
 </script>
 
 <style lang="scss">
+.colour-red {
+  background: red !important;
+  color: white !important;
+}
+
+.colour-darkgreen {
+  background: darkgreen !important;
+  color: white !important;
+}
+
+.colour-indigo {
+  background: indigo !important;
+  color: white !important;
+}
+
+.colour-orange {
+  background: orange !important;
+  color: white !important;
+}
+
+.colour-darkmagenta {
+  background: darkmagenta !important;
+  color: white !important;
+}
+
+.gantt-schedule-timeline-calendar__chart-calendar-date--level-0 .gantt-schedule-timeline-calendar__chart-calendar-date-content {
+  margin-left: 0;
+}
+
 .gantt-schedule-timeline-calendar__chart-timeline-grid-row-block--weekend {
   background: lightgray !important;
 }
